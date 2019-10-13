@@ -2,13 +2,17 @@
 
 Add [scoop](https://scoop.sh) support for [laragon](https://laragon.org)
 
-# install
+## note
+
+Execute using `PowerShell >= 5`
+
+## install
 
 ```ps1
-Install-Module laragon
+inmo laragon
 ```
 
-# example
+## example
 
 ```ps1
 Install-LaragonApp nginx
