@@ -5,14 +5,34 @@ if (!(Test-Path scoop)) {
     exit
 }
 
-$UninstallPaths = @(
-    'HKLM:SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall'
-    'HKCU:Software\Microsoft\Windows\CurrentVersion\Uninstall'
-)
-if ([System.IntPtr]::Size -eq 8) {
-    $UninstallPaths += 'HKLM:SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall'
+$LaragonHome = $env:LaragonHome
+if (!$LaragonHome) {
+    $UninstallPaths = @(
+        'HKLM:SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall'
+        'HKCU:Software\Microsoft\Windows\CurrentVersion\Uninstall'
+    )
+    if ([IntPtr]::Size -eq 8) {
+        $UninstallPaths += 'HKLM:SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall'
+    }
+
+    $laragon = Get-ChildItem $UninstallPaths | Where-Object { $_.Name -like '*laragon*' }
+    if ($laragon) {
+        $LaragonHome = $laragon.GetValue('InstallLocation')
+    }
+    else {
+        $laragon = Get-PSDrive -PSProvider FileSystem | ForEach-Object {
+            Get-ChildItem $_.Root 'laragon.exe' -File -Recurse -ErrorAction SilentlyContinue
+        } | Select-Object -First 1
+    if ($laragon) {
+        $LaragonHome = Split-Path $laragon
+    }
+    else {
+        Write-Warning 'Laragon is not installed.'
+        exit
+    }
 }
-$InstallLocation = (Get-ChildItem $UninstallPaths | Where-Object { $_.Name -like '*laragon*' }).GetValue('InstallLocation')
+[Environment]::SetEnvironmentVariable('LaragonHome', $LaragonHome, 'User')
+}
 
 function Get-ScoopAppName ([Parameter(Mandatory)] $Name) {
     $alias = @{
@@ -32,7 +52,7 @@ function Get-ScoopAppName ([Parameter(Mandatory)] $Name) {
 function Install-LaragonApp ([Parameter(Mandatory)] $Name) {
     scoop install (Get-ScoopAppName($Name))
 
-    Remove-Item "${InstallLocation}bin\$Name" -Recurse -Force -ErrorAction Ignore
+    Remove-Item "$LaragonHome\bin\$Name" -Recurse -Force -ErrorAction Ignore
 
     $AppDir = scoop prefix (Get-ScoopAppName($Name))
 
@@ -40,11 +60,11 @@ function Install-LaragonApp ([Parameter(Mandatory)] $Name) {
         $AppDir = Split-Path $AppDir
     }
 
-    New-Item "${InstallLocation}bin\$Name" -ItemType Junction -Value $AppDir
+    New-Item "$LaragonHome\bin\$Name" -ItemType Junction -Value $AppDir
 }
 
 function Uninstall-LaragonApp ([Parameter(Mandatory)] $Name) {
     scoop uninstall (Get-ScoopAppName($Name))
 
-    Remove-Item "${InstallLocation}bin\$Name" -Recurse -Force -ErrorAction Ignore
+    Remove-Item "$LaragonHome\bin\$Name" -Recurse -Force -ErrorAction Ignore
 }
