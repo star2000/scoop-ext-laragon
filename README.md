@@ -1,6 +1,6 @@
 # laragon
 
-Add [scoop](https://scoop.sh) support for laragon
+Add [scoop](https://scoop.sh) support for [laragon](https://laragon.org)
 
 # install
 
