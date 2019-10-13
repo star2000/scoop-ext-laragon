@@ -11,7 +11,7 @@
     RootModule        = 'laragon.psm1'
 
     # 此模块的版本号。
-    ModuleVersion     = '1.1.0'
+    ModuleVersion     = '1.2.0'
 
     # 支持的 PSEditions
     # CompatiblePSEditions = @()

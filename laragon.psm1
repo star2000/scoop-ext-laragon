@@ -24,7 +24,7 @@ if (!$LaragonHome) {
             Get-ChildItem $_.Root 'laragon.exe' -File -Recurse -ErrorAction SilentlyContinue
         } | Select-Object -First 1
     if ($laragon) {
-        $LaragonHome = Split-Path $laragon
+        $LaragonHome = $laragon.Directory
     }
     else {
         Write-Warning 'Laragon is not installed.'
