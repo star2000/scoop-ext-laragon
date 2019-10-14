@@ -11,7 +11,7 @@
     RootModule        = 'laragon.psm1'
 
     # 此模块的版本号。
-    ModuleVersion     = '1.2.0'
+    ModuleVersion     = '1.2.1'
 
     # 支持的 PSEditions
     # CompatiblePSEditions = @()
@@ -89,7 +89,10 @@
     # ModuleList = @()
 
     # 与此模块一起打包的所有文件的列表
-    # FileList = @()
+    FileList          = @(
+        'laragon.psd1'
+        'laragon.psm1'
+    )
 
     # 要传递到 RootModule/ModuleToProcess 中指定的模块的专用数据。这还可能包含 PSData 哈希表以及 PowerShell 使用的其他模块元数据。
     PrivateData       = @{
