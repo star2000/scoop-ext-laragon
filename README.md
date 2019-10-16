@@ -9,7 +9,7 @@ Execute using `PowerShell >= 5`
 ## install
 
 ```ps1
-inmo laragon
+inmo laragon -Scope CurrentUser
 ```
 
 ## example
