@@ -5,7 +5,7 @@ if (!(Test-Path scoop)) {
     exit
 }
 
-$LaragonHome = $env:LaragonHome
+$LaragonHome = $env:LARAGON_HOME
 if (!$LaragonHome) {
     $UninstallPaths = @(
         'HKLM:SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall'
@@ -21,7 +21,7 @@ if (!$LaragonHome) {
     }
     else {
         $laragon = Get-PSDrive -PSProvider FileSystem | ForEach-Object {
-            Get-ChildItem $_.Root 'laragon.exe' -File -Recurse -ErrorAction SilentlyContinue
+            Get-ChildItem $_.Root 'laragon.exe' -File -Recurse -ErrorAction Ignore
         } | Select-Object -First 1
     if ($laragon) {
         $LaragonHome = $laragon.Directory
@@ -31,18 +31,40 @@ if (!$LaragonHome) {
         exit
     }
 }
-[Environment]::SetEnvironmentVariable('LaragonHome', $LaragonHome, 'User')
+[Environment]::SetEnvironmentVariable('LARAGON_HOME', $LaragonHome, 'User')
 }
 
-function Get-ScoopAppName ([Parameter(Mandatory)] $Name) {
-    $alias = @{
+function Get-LaragonAlias ([Parameter(Mandatory)] $Name) {
+    $Name = ($Name -split '@')[0]
+    $Alias = @{
+        'sublime-text'    = 'sublime'
+        'vscode'          = 'code'
+        'notepadplusplus' = 'notepad++'
+        'mariadb'         = 'mysql'
+    }
+    if ($Alias.ContainsKey($Name)) {
+        return $Alias.$Name
+    }
+    else {
+        return $Name
+    }
+
+}
+
+function Get-ScoopAlias ([Parameter(Mandatory)] $Name) {
+    $App, $Version = $Name -split '@'
+    $Alias = @{
         'sublime'   = 'sublime-text'
         'code'      = 'vscode'
         'notepad++' = 'notepadplusplus'
-        'mysql'     = 'mariadb'
     }
-    if ($alias.ContainsKey($Name)) {
-        return $alias.$Name
+    if ($Alias.ContainsKey($App)) {
+        if ($Version) {
+            return $Alias.$App, $Version -join '@'
+        }
+        else {
+            return $Alias.$App
+        }
     }
     else {
         return $Name
@@ -50,21 +72,29 @@ function Get-ScoopAppName ([Parameter(Mandatory)] $Name) {
 }
 
 function Install-LaragonApp ([Parameter(Mandatory)] $Name) {
-    scoop install (Get-ScoopAppName($Name))
+    $ScoopApp = Get-ScoopAlias $Name
+    $LaragonApp = Get-LaragonAlias $Name
 
-    Remove-Item "$LaragonHome\bin\$Name" -Recurse -Force -ErrorAction Ignore
+    scoop install $ScoopApp
+    $AppDir = scoop prefix ($ScoopApp -split '@')[0]
 
-    $AppDir = scoop prefix (Get-ScoopAppName($Name))
-
-    if ($Name -in 'apache', 'memcached', 'mongodb', 'mysql', 'nginx', 'nodejs', 'php', 'python', 'redis') {
+    if ($LaragonApp -in 'apache', 'memcached', 'mongodb', 'mysql', 'nginx', 'nodejs', 'php', 'python', 'redis') {
         $AppDir = Split-Path $AppDir
     }
 
-    New-Item "$LaragonHome\bin\$Name" -ItemType Junction -Value $AppDir
+    Remove-Item "$LaragonHome\bin\$LaragonApp" -Recurse -Force -ErrorAction Ignore
+
+    New-Item "$LaragonHome\bin\$LaragonApp" -ItemType Junction -Value $AppDir
 }
 
 function Uninstall-LaragonApp ([Parameter(Mandatory)] $Name) {
-    scoop uninstall (Get-ScoopAppName($Name))
+    $ScoopApp = Get-ScoopAlias $Name
+    $LaragonApp = Get-LaragonAlias $Name
 
-    Remove-Item "$LaragonHome\bin\$Name" -Recurse -Force -ErrorAction Ignore
+    scoop uninstall $ScoopApp
+
+    Remove-Item "$LaragonHome\bin\$LaragonApp" -Recurse -Force -ErrorAction Ignore
 }
+
+New-Alias inla Install-LaragonApp
+New-Alias unla Uninstall-LaragonApp

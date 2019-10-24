@@ -15,6 +15,10 @@ inmo laragon -Scope CurrentUser
 ## example
 
 ```ps1
-Install-LaragonApp nginx
-Uninstall-LaragonApp apache
+# Install the latest version of mariadb
+inla mariadb
+# Install v1.16.1 version of nginx
+inla nginx@1.16.1
+# Uninstall apache
+unla apache
 ```

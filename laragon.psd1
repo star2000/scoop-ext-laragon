@@ -11,7 +11,7 @@
     RootModule        = 'laragon.psm1'
 
     # 此模块的版本号。
-    ModuleVersion     = '1.2.2'
+    ModuleVersion     = '1.3.0'
 
     # 支持的 PSEditions
     # CompatiblePSEditions = @()
@@ -80,7 +80,10 @@
     VariablesToExport = @()
 
     # 要从此模块中导出的别名。为了获得最佳性能，请不要使用通配符，不要删除该条目。如果没有要导出的别名，请使用空数组。
-    AliasesToExport   = @()
+    AliasesToExport   = @(
+        'inla'
+        'unla'
+    )
 
     # 要从此模块导出的 DSC 资源
     # DscResourcesToExport = @()
