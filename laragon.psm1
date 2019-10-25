@@ -36,9 +36,12 @@ if (!$LaragonHome) {
 
 function Get-LaragonAlias ([Parameter(Mandatory)] $Name) {
     $Name = ($Name -split '@')[0]
+    $Name = ($Name -split '-')[0]
+    $Name = $Name -replace '\d*$'
+
     $Alias = @{
-        'sublime-text'    = 'sublime'
         'vscode'          = 'code'
+        'vscodium'        = 'code'
         'notepadplusplus' = 'notepad++'
         'mariadb'         = 'mysql'
     }
@@ -48,7 +51,6 @@ function Get-LaragonAlias ([Parameter(Mandatory)] $Name) {
     else {
         return $Name
     }
-
 }
 
 function Get-ScoopAlias ([Parameter(Mandatory)] $Name) {
