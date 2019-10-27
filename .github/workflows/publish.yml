@@ -1,0 +1,15 @@
+on:
+  push:
+    paths:
+      - laragon.psd1
+
+jobs:
+  publish:
+    runs-on: windows-latest
+    steps:
+      - name: 下载源码
+        run: git clone --depth=1 https://github.com/${{ github.repository }} .
+
+      - name: 发布
+        shell: pwsh
+        run: Publish-Module -Path . -NuGetApiKey ${{ secrets.NuGetApiKey }}
