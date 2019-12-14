@@ -1,10 +1,6 @@
-# laragon
+# scoop-ext-laragon
 
-Add [scoop](https://scoop.sh) support for [laragon](https://laragon.org)
-
-## note
-
-Execute using `PowerShell >= 5`
+Install [laragon](https://laragon.org) app from [scoop](https://scoop.sh).
 
 ## install
 
@@ -14,11 +10,16 @@ inmo laragon -Scope CurrentUser
 
 ## example
 
+- inla is short for Install-LaragonApp.
+- unla is short for Uninstall-LaragonApp.
+
 ```ps1
 # Install the latest version of mariadb
 inla mariadb
-# Install v1.16.1 version of nginx
+
+# Install the specified version
 inla nginx@1.16.1
+
 # Uninstall apache
 unla apache
 ```
