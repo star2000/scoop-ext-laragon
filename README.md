@@ -3,7 +3,7 @@
 ![PowerShell Gallery Version](https://img.shields.io/powershellgallery/v/laragon)
 ![PowerShell Gallery](https://img.shields.io/powershellgallery/dt/laragon)
 
-Install [laragon](https://laragon.org) app from [scoop](https://scoop.sh).
+Manage [laragon](https://laragon.org) app from [scoop](https://scoop.sh).
 
 ## install
 
