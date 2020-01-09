@@ -11,7 +11,7 @@
     RootModule        = 'laragon.psm1'
 
     # 此模块的版本号。
-    ModuleVersion     = '1.3.1'
+    ModuleVersion     = '1.3.2'
 
     # 支持的 PSEditions
     # CompatiblePSEditions = @()
@@ -23,13 +23,13 @@
     Author            = 'star2000'
 
     # 此模块所属的公司或供应商
-    CompanyName       = '未知'
+    # CompanyName       = ''
 
     # 此模块的版权声明
     Copyright         = '(c) 2019 star2000。保留所有权利。'
 
     # 此模块所提供功能的说明
-    Description       = 'Add scoop support for laragon'
+    Description       = 'Manage laragon app from scoop'
 
     # 此模块要求的 Windows PowerShell 引擎的最低版本
     PowerShellVersion = '5.0'
@@ -100,19 +100,19 @@
         PSData = @{
 
             # 应用于此模块的标记。这些标记有助于在联机库中执行模块发现。
-            Tags = @(
+            Tags       = @(
                 'scoop'
                 'laragon'
             )
 
             # 指向此模块的许可证的 URL。
-            LicenseUri = 'https://www.gnu.org/licenses/gpl-3.0.html'
+            LicenseUri = 'https://github.com/star2000/scoop-ext-laragon/blob/master/LICENSE'
 
             # 指向此项目的主网站的 URL。
-            ProjectUri = 'https://github.com/star2000/laragon'
+            ProjectUri = 'https://github.com/star2000/scoop-ext-laragon'
 
             # 指向表示此模块的图标的 URL。
-            # IconUri = ''
+            IconUri    = 'https://avatars1.githubusercontent.com/u/42126168?v=4'
 
             # 此模块的 ReleaseNotes
             # ReleaseNotes = ''
@@ -122,7 +122,7 @@
     } # PrivateData 哈希表末尾
 
     # 此模块的 HelpInfo URI
-    # HelpInfoURI = ''
+    HelpInfoURI       = 'https://github.com/star2000/scoop-ext-laragon'
 
     # 从此模块中导出的命令的默认前缀。可以使用 Import-Module -Prefix 覆盖默认前缀。
     # DefaultCommandPrefix = ''
