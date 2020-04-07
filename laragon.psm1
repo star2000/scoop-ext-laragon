@@ -1,12 +1,23 @@
-if (!(Test-Path scoop)) {
+if (!(Get-Command scoop -ErrorAction Ignore)) {
     Write-Warning 'scoop is required.'
     Write-Warning 'Execute the following command to install.'
     Write-Warning 'iwr -useb get.scoop.sh | iex'
     exit
 }
 
-$LaragonHome = $env:LARAGON_HOME
-if (!$LaragonHome) {
+function Get-LaragonHome() {
+    # 
+    foreach ($dir in
+        $env:LARAGON_HOME,
+        'C:\laragon\',
+        "$env:USERPROFILE\scoop\apps\laragon\current\"
+    ) {
+        if ($dir -and (Join-Path $dir 'laragon.exe' | Test-Path)) {
+            return $dir
+        }
+    }
+    Remove-Variable dir
+    # 
     $UninstallPaths = @(
         'HKLM:SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall'
         'HKCU:Software\Microsoft\Windows\CurrentVersion\Uninstall'
@@ -14,25 +25,26 @@ if (!$LaragonHome) {
     if ([IntPtr]::Size -eq 8) {
         $UninstallPaths += 'HKLM:SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall'
     }
-
     $laragon = Get-ChildItem $UninstallPaths | Where-Object { $_.Name -like '*laragon*' }
     if ($laragon) {
-        $LaragonHome = $laragon.GetValue('InstallLocation')
+        return $laragon.GetValue('InstallLocation')
     }
-    else {
-        $laragon = Get-PSDrive -PSProvider FileSystem | ForEach-Object {
-            Get-ChildItem $_.Root 'laragon.exe' -File -Recurse -ErrorAction Ignore
-        } | Select-Object -First 1
+    Remove-Variable UninstallPaths
+    Remove-Variable laragon
+    # 
+    Write-Output 'Looking for laragon installation location'
+    $laragon = Get-PSDrive -PSProvider FileSystem | ForEach-Object {
+        Get-ChildItem $_.Root 'laragon.exe' -File -Recurse -ErrorAction Ignore
+    } | Select-Object -First 1
     if ($laragon) {
-        $LaragonHome = $laragon.Directory
+        return $laragon.Directory
     }
-    else {
-        Write-Warning 'Laragon is not installed.'
-        exit
-    }
+    Write-Error "Can't find laragon"
+    exit
 }
+
+$LaragonHome = Get-LaragonHome
 [Environment]::SetEnvironmentVariable('LARAGON_HOME', $LaragonHome, 'User')
-}
 
 function Get-LaragonAlias ([Parameter(Mandatory)] $Name) {
     $Name = ($Name -split '@')[0]
