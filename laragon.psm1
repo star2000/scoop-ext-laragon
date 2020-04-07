@@ -5,19 +5,19 @@ if (!(Get-Command scoop -ErrorAction Ignore)) {
     exit
 }
 
-function Get-LaragonHome() {
-    # 
-    foreach ($dir in
-        $env:LARAGON_HOME,
-        'C:\laragon\',
-        "$env:USERPROFILE\scoop\apps\laragon\current\"
-    ) {
-        if ($dir -and (Join-Path $dir 'laragon.exe' | Test-Path)) {
-            return $dir
-        }
+foreach ($dir in
+    $env:LARAGON_HOME,
+    'C:\laragon\',
+    "$env:USERPROFILE\scoop\apps\laragon\current\"
+) {
+    if ($dir -and (Join-Path $dir 'laragon.exe' | Test-Path)) {
+        $LaragonHome = $dir
+        break
     }
-    Remove-Variable dir
-    # 
+}
+Remove-Variable dir
+
+if (!$LaragonHome) {
     $UninstallPaths = @(
         'HKLM:SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall'
         'HKCU:Software\Microsoft\Windows\CurrentVersion\Uninstall'
@@ -27,23 +27,25 @@ function Get-LaragonHome() {
     }
     $laragon = Get-ChildItem $UninstallPaths | Where-Object { $_.Name -like '*laragon*' }
     if ($laragon) {
-        return $laragon.GetValue('InstallLocation')
+        $LaragonHome = $laragon.GetValue('InstallLocation')
     }
     Remove-Variable UninstallPaths
     Remove-Variable laragon
-    # 
+}
+
+if (!$LaragonHome) {
     Write-Output 'Looking for laragon installation location'
     $laragon = Get-PSDrive -PSProvider FileSystem | ForEach-Object {
         Get-ChildItem $_.Root 'laragon.exe' -File -Recurse -ErrorAction Ignore
     } | Select-Object -First 1
     if ($laragon) {
-        return $laragon.Directory
+        $LaragonHome = $laragon.Directory
     }
-    Write-Error "Can't find laragon"
-    exit
+    else {
+        Write-Error "Can't find laragon"
+        exit
+    }
 }
-
-$LaragonHome = Get-LaragonHome
 [Environment]::SetEnvironmentVariable('LARAGON_HOME', $LaragonHome, 'User')
 
 function Get-LaragonAlias ([Parameter(Mandatory)] $Name) {
