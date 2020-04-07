@@ -7,7 +7,15 @@ Manage [laragon](https://laragon.org) app from [scoop](https://scoop.sh).
 
 ## install
 
-```ps1
+### use scoop
+
+```powershell
+scoop install 'https://raw.githubusercontent.com/star2000/scoop-ext-laragon/master/scoop-ext-laragon.json'
+```
+
+### use nuget
+
+```powershell
 inmo laragon -Scope CurrentUser
 ```
 
@@ -16,7 +24,7 @@ inmo laragon -Scope CurrentUser
 - inla is short for Install-LaragonApp.
 - unla is short for Uninstall-LaragonApp.
 
-```ps1
+```powershell
 # Install the latest version of mariadb
 inla mariadb
 
