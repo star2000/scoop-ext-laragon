@@ -1,52 +1,55 @@
-if (!(Get-Command scoop -ErrorAction Ignore)) {
-    Write-Warning 'scoop is required.'
-    Write-Warning 'Execute the following command to install.'
-    Write-Warning 'iwr -useb get.scoop.sh | iex'
-    exit
-}
+function Get-LaragonHome {
+    if (!(Get-Command scoop -ErrorAction Ignore)) {
+        Write-Warning 'scoop is required.'
+        Write-Warning 'Execute the following command to install.'
+        Write-Warning 'iwr -useb get.scoop.sh | iex'
+        return $false
+    }
 
-foreach ($dir in
-    $env:LARAGON_HOME,
-    'C:\laragon\',
-    "$env:USERPROFILE\scoop\apps\laragon\current\"
-) {
-    if ($dir -and (Join-Path $dir 'laragon.exe' | Test-Path)) {
-        $LaragonHome = $dir
-        break
+    foreach ($dir in
+        $env:LARAGON_HOME,
+        'C:\laragon\',
+        "$env:USERPROFILE\scoop\apps\laragon\current\"
+    ) {
+        if ($dir -and (Join-Path $dir 'laragon.exe' | Test-Path)) {
+            $LaragonHome = $dir
+            break
+        }
     }
-}
-Remove-Variable dir
+    Remove-Variable dir
 
-if (!$LaragonHome) {
-    $UninstallPaths = @(
-        'HKLM:SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall'
-        'HKCU:Software\Microsoft\Windows\CurrentVersion\Uninstall'
-    )
-    if ([IntPtr]::Size -eq 8) {
-        $UninstallPaths += 'HKLM:SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall'
+    if (!$LaragonHome) {
+        $UninstallPaths = @(
+            'HKLM:SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall'
+            'HKCU:Software\Microsoft\Windows\CurrentVersion\Uninstall'
+        )
+        if ([IntPtr]::Size -eq 8) {
+            $UninstallPaths += 'HKLM:SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall'
+        }
+        $laragon = Get-ChildItem $UninstallPaths | Where-Object { $_.Name -like '*laragon*' }
+        if ($laragon) {
+            $LaragonHome = $laragon.GetValue('InstallLocation')
+        }
+        Remove-Variable UninstallPaths
+        Remove-Variable laragon
     }
-    $laragon = Get-ChildItem $UninstallPaths | Where-Object { $_.Name -like '*laragon*' }
-    if ($laragon) {
-        $LaragonHome = $laragon.GetValue('InstallLocation')
-    }
-    Remove-Variable UninstallPaths
-    Remove-Variable laragon
-}
 
-if (!$LaragonHome) {
-    Write-Output 'Looking for laragon installation location'
-    $laragon = Get-PSDrive -PSProvider FileSystem | ForEach-Object {
-        Get-ChildItem $_.Root 'laragon.exe' -File -Recurse -ErrorAction Ignore
-    } | Select-Object -First 1
-    if ($laragon) {
-        $LaragonHome = $laragon.Directory
+    if (!$LaragonHome) {
+        Write-Warning 'Looking for laragon installation location'
+        $laragon = Get-PSDrive -PSProvider FileSystem | ForEach-Object {
+            Get-ChildItem $_.Root 'laragon.exe' -File -Recurse -ErrorAction Ignore
+        } | Select-Object -First 1
+        if ($laragon) {
+            $LaragonHome = $laragon.Directory
+        }
+        else {
+            Write-Warning "Can't find laragon"
+            return $false
+        }
     }
-    else {
-        Write-Error "Can't find laragon"
-        exit
-    }
+    [Environment]::SetEnvironmentVariable('LARAGON_HOME', $LaragonHome, 'User')
+    return $LaragonHome
 }
-[Environment]::SetEnvironmentVariable('LARAGON_HOME', $LaragonHome, 'User')
 
 function Get-LaragonAlias ([Parameter(Mandatory)] $Name) {
     $Name = ($Name -split '@')[0]
@@ -88,6 +91,8 @@ function Get-ScoopAlias ([Parameter(Mandatory)] $Name) {
 }
 
 function Install-LaragonApp ([Parameter(Mandatory)] $Name) {
+    $LaragonHome = Get-LaragonHome
+    if (!$LaragonHome) { return }
     $ScoopApp = Get-ScoopAlias $Name
     $LaragonApp = Get-LaragonAlias $Name
 
@@ -104,6 +109,8 @@ function Install-LaragonApp ([Parameter(Mandatory)] $Name) {
 }
 
 function Uninstall-LaragonApp ([Parameter(Mandatory)] $Name) {
+    $LaragonHome = Get-LaragonHome
+    if (!$LaragonHome) { return }
     $ScoopApp = Get-ScoopAlias $Name
     $LaragonApp = Get-LaragonAlias $Name
 
